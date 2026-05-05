@@ -119,6 +119,22 @@ remnant install antigravity
 remnant install all
 ```
 
+If you run install from your home folder, Remnant installs global agent instructions here:
+
+```text
+%USERPROFILE%\.claude\CLAUDE.md
+%USERPROFILE%\.codex\AGENTS.md
+%USERPROFILE%\.gemini\GEMINI.md
+```
+
+If you run install inside a project folder, Remnant adds project-local instructions:
+
+```text
+.claude\CLAUDE.md
+AGENTS.md
+GEMINI.md
+```
+
 If `remnant` is not recognized, the PATH update has not loaded yet. Open a new Command Prompt and try again.
 
 ## No Paste Setup For Claude Code
@@ -207,6 +223,8 @@ Initialize local memory at the repository root:
 ```bash
 uv run remnant init --file ../../REMNANT.md
 ```
+
+Do not run `remnant init` from your home folder. Run it inside a project folder so `REMNANT.md` belongs to that project.
 
 Save context before switching agents:
 

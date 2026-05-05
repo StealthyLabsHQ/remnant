@@ -62,6 +62,17 @@ def test_init_force_overwrites_existing_remnant(tmp_path: Path, monkeypatch: Mon
     assert result.exit_code == 0
 
 
+def test_init_refuses_default_file_in_home(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(app, ["init"], catch_exceptions=False)
+
+    assert result.exit_code == 1
+    assert "home folder" in result.stderr
+    assert not (tmp_path / "REMNANT.md").exists()
+
+
 def test_capture_without_next_on_empty_remnant_fails_clearly(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setenv("REMNANT_HOME", str(tmp_path / ".remnant-home"))
     monkeypatch.chdir(tmp_path)
@@ -186,6 +197,35 @@ def test_install_all_appends_without_duplicate_blocks(tmp_path: Path, monkeypatc
     assert rerun.exit_code == 0
     assert agents.count("For Codex") == 1
     assert agents.count("For Google Antigravity") == 1
+
+
+def test_install_all_from_home_uses_global_agent_dirs(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(app, ["install", "all"], catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert (tmp_path / ".claude" / "CLAUDE.md").exists()
+    assert (tmp_path / ".codex" / "AGENTS.md").exists()
+    assert (tmp_path / ".gemini" / "GEMINI.md").exists()
+    assert not (tmp_path / "AGENTS.md").exists()
+    assert not (tmp_path / "GEMINI.md").exists()
+
+
+def test_install_global_scope_uses_global_agent_dirs(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    home = tmp_path / "home"
+    project = tmp_path / "project"
+    home.mkdir()
+    project.mkdir()
+    monkeypatch.setenv("USERPROFILE", str(home))
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.chdir(project)
+    result = runner.invoke(app, ["install", "codex", "--scope", "global"], catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert (home / ".codex" / "AGENTS.md").exists()
+    assert not (project / "AGENTS.md").exists()
 
 
 def test_status_fails_clearly_when_remnant_is_invalid(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:

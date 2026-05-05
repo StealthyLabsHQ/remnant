@@ -27,6 +27,9 @@ def init(
     force: Annotated[bool, typer.Option("--force", help="overwrite existing REMNANT.md")] = False,
 ) -> None:
     """Init Remnant in current repo."""
+    if file == DEFAULT_FILE and Path.cwd().resolve() == Path.home().resolve():
+        _fail("Refusing to create REMNANT.md in the home folder. Run inside a project or pass --file.")
+
     path = Path(file).resolve()
     if path.exists() and not force:
         _fail(f"{file} already exists. Use --force to overwrite.")
@@ -118,18 +121,22 @@ def install(
         typer.Argument(help="agent integration to install"),
     ],
     force: Annotated[bool, typer.Option("--force", help="overwrite existing Remnant-managed files")] = False,
+    scope: Annotated[
+        Literal["auto", "project", "global"],
+        typer.Option("--scope", help="install scope: auto, project, or global"),
+    ] = "auto",
 ) -> None:
     """Install agent integration files."""
+    install_scope = _resolve_install_scope(scope)
     if agent in ("claude", "all"):
-        _install_claude(force)
-        _append_agent_block(Path("CLAUDE.md"), "Claude Code")
+        _install_claude(force, install_scope)
     if agent in ("codex", "all"):
-        _append_agent_block(Path("AGENTS.md"), "Codex")
+        _append_agent_block(_agent_instruction_path("codex", install_scope), "Codex")
     if agent in ("antigravity", "all"):
-        _append_agent_block(Path("AGENTS.md"), "Google Antigravity")
+        _append_agent_block(_agent_instruction_path("codex", install_scope), "Google Antigravity")
     if agent in ("gemini", "all"):
-        _append_agent_block(Path("GEMINI.md"), "Gemini CLI")
-    typer.echo(f"Installed {agent} Remnant integration")
+        _append_agent_block(_agent_instruction_path("gemini", install_scope), "Gemini CLI")
+    typer.echo(f"Installed {agent} Remnant integration ({install_scope})")
 
 
 def _read_remnant(file: str):
@@ -172,19 +179,45 @@ def _run_git(cwd: Path, args: list[str]) -> str | None:
     return output or None
 
 
-def _install_claude(force: bool) -> None:
+def _resolve_install_scope(scope: Literal["auto", "project", "global"]) -> Literal["project", "global"]:
+    if scope != "auto":
+        return scope
+    return "global" if Path.cwd().resolve() == Path.home().resolve() else "project"
+
+
+def _agent_instruction_path(agent: Literal["claude", "codex", "gemini"], scope: Literal["project", "global"]) -> Path:
+    if scope == "global":
+        if agent == "claude":
+            return Path.home() / ".claude" / "CLAUDE.md"
+        if agent == "codex":
+            return Path.home() / ".codex" / "AGENTS.md"
+        return Path.home() / ".gemini" / "GEMINI.md"
+
+    if agent == "claude":
+        return Path("CLAUDE.md")
+    if agent == "codex":
+        return Path("AGENTS.md")
+    return Path("GEMINI.md")
+
+
+def _install_claude(force: bool, scope: Literal["project", "global"]) -> None:
+    _append_agent_block(_agent_instruction_path("claude", scope), "Claude Code")
+
+    if scope == "global":
+        return
+
     claude_dir = Path(".claude")
     hooks_dir = claude_dir / "hooks"
     memory_file = claude_dir / "CLAUDE.md"
     settings_file = claude_dir / "settings.json"
     hook_file = hooks_dir / "remnant_session_start.py"
 
-    for path in (memory_file, settings_file, hook_file):
+    for path in (settings_file, hook_file):
         if path.exists() and not force:
             _fail(f"{path} already exists. Use --force to overwrite.")
 
     hooks_dir.mkdir(parents=True, exist_ok=True)
-    memory_file.write_text(_claude_memory_text(), encoding="utf-8")
+    _append_agent_block(memory_file, "Claude Code")
     hook_file.write_text(_claude_session_start_hook(), encoding="utf-8")
     settings_file.write_text(json.dumps(_claude_settings(), indent=2), encoding="utf-8")
 
@@ -208,6 +241,7 @@ For {agent_name}, use Remnant without copy/paste:
     existing = path.read_text(encoding="utf-8") if path.exists() else f"# {path.stem}\n"
     if marker in existing:
         return
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(existing.rstrip() + block + "\n", encoding="utf-8")
 
 
