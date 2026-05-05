@@ -13,7 +13,8 @@ The agent reads `REMNANT.md` at startup and writes a compact handoff before endi
 ```text
 REMNANT.md
 |-- Session   date, agent, duration
-|-- Done      completed work
+|-- History   one-line summaries of previous sessions (max 5)
+|-- Done      completed work this session
 |-- Failed    failed attempts and reason
 |-- State     current project state and important files
 |-- Next      exact next step
@@ -78,40 +79,42 @@ The agent writes a summary, not a transcript. It captures only what a new agent 
 Before the final response, update `REMNANT.md`:
 
 ```text
-Done      completed work only
+History   roll previous Done into one line (keep last 5, drop oldest)
+Done      this session's completed work only — fresh each session
 Failed    failed attempts and reason
-State     current project state and important files
+State     current project state as a snapshot — replace, do not append
 Next      exact next task for a new context
 Blockers  unresolved decisions or dependencies
 ```
 
 ## Example
 
-A compressed handoff after a long session:
+A compressed handoff after multiple sessions:
 
 ```markdown
 # Remnant - remnant
 
 ## Session
-- date: 2026-05-05T12:00:00Z
-- agent: codex
-- duration: 90
+- date: 2026-05-05T14:00:00Z
+- agent: claude-code
+- duration: 30
+
+## History
+- 2026-05-04 (codex, 90m): repositioned as Markdown-only protocol, removed CLI and install scripts
 
 ## Done
-- Repositioned Remnant as a Markdown-only protocol.
-- Removed the CLI and install scripts.
-- Updated agent instruction files to create and maintain REMNANT.md directly.
+- Improved compression rule in agent files.
+- Restructured README for beginner clarity.
 
 ## Failed
-- CLI-based install flow confused users because it looked successful without obvious files.
+- None.
 
 ## State
-- Public docs now lead with zero-install Markdown usage.
-- `REMNANT.md` is local-only and ignored by Git.
-- `REMNANT.template.md` is the committed safe starting point.
+- All agent files consistent.
+- README restructured, zero-install preserved.
 
 ## Next
-- Review the README for beginner clarity and publish the Markdown-only direction.
+- Review and publish.
 
 ## Blockers
 - None.
@@ -127,14 +130,17 @@ A compressed handoff after a long session:
 - agent: <claude-code | codex | gemini-cli | antigravity | other>
 - duration: <minutes>
 
+## History
+- <one-line summary per previous session — oldest first, max 5 — or "None">
+
 ## Done
-- <completed work>
+- <completed work — this session only>
 
 ## Failed
 - <failed attempt and reason>
 
 ## State
-- <current state and important files>
+- <current state as a snapshot — replace each session>
 
 ## Next
 - <exact next step>

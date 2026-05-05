@@ -15,9 +15,10 @@ For Claude Code.
 
 Before the final response, update `REMNANT.md` with a compact, non-sensitive handoff:
 
-- `Done`: completed work only
+- `History`: roll the previous session's `Done` into one summary line, append to History (keep last 5, drop oldest)
+- `Done`: this session's completed work only — fresh each session, not cumulative
 - `Failed`: attempted work that failed and why
-- `State`: current project state and important files
+- `State`: current project state as a snapshot — replace fully, do not append
 - `Next`: exact next task for a new context
 - `Blockers`: unresolved decisions or dependencies
 

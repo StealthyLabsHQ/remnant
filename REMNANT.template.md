@@ -5,6 +5,9 @@
 - agent: <claude-code | codex | gemini-cli | antigravity | other>
 - duration: <minutes>
 
+## History
+- <one-line summary per previous session — oldest first, max 5 — or "None">
+
 ## Done
 - <completed task — one bullet per item>
 
