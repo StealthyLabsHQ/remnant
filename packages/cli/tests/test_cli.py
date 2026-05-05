@@ -190,6 +190,7 @@ def test_install_codex_appends_agents_md(tmp_path: Path, monkeypatch: MonkeyPatc
     assert "# Existing Agents" in content
     assert "For Codex" in content
     assert "## Remnant Integration" in content
+    assert str(tmp_path / "AGENTS.md") in result.stdout
 
 
 def test_install_gemini_appends_gemini_md(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:

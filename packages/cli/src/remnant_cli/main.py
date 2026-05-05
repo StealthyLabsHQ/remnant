@@ -155,15 +155,20 @@ def install(
 ) -> None:
     """Install agent integration files."""
     install_scope = _resolve_install_scope(scope)
+    installed_paths: list[str] = []
     if agent in ("claude", "all"):
-        _install_claude(force, install_scope)
+        installed_paths.extend(_install_claude(force, install_scope))
     if agent in ("codex", "all"):
-        _append_agent_block(_agent_instruction_path("codex", install_scope), "Codex")
+        installed_paths.append(_append_agent_block(_agent_instruction_path("codex", install_scope), "Codex"))
     if agent in ("antigravity", "all"):
-        _append_agent_block(_agent_instruction_path("codex", install_scope), "Google Antigravity")
+        installed_paths.append(
+            _append_agent_block(_agent_instruction_path("codex", install_scope), "Google Antigravity")
+        )
     if agent in ("gemini", "all"):
-        _append_agent_block(_agent_instruction_path("gemini", install_scope), "Gemini CLI")
+        installed_paths.append(_append_agent_block(_agent_instruction_path("gemini", install_scope), "Gemini CLI"))
     typer.echo(f"Installed {agent} Remnant integration ({install_scope})")
+    for installed_path in installed_paths:
+        typer.echo(f"- {installed_path}")
 
 
 def _read_remnant(file: str):
@@ -227,11 +232,11 @@ def _agent_instruction_path(agent: Literal["claude", "codex", "gemini"], scope: 
     return Path("GEMINI.md")
 
 
-def _install_claude(force: bool, scope: Literal["project", "global"]) -> None:
-    _append_agent_block(_agent_instruction_path("claude", scope), "Claude Code")
+def _install_claude(force: bool, scope: Literal["project", "global"]) -> list[str]:
+    installed_paths = [_append_agent_block(_agent_instruction_path("claude", scope), "Claude Code")]
 
     if scope == "global":
-        return
+        return installed_paths
 
     claude_dir = Path(".claude")
     hooks_dir = claude_dir / "hooks"
@@ -244,12 +249,15 @@ def _install_claude(force: bool, scope: Literal["project", "global"]) -> None:
             _fail(f"{path} already exists. Use --force to overwrite.")
 
     hooks_dir.mkdir(parents=True, exist_ok=True)
-    _append_agent_block(memory_file, "Claude Code")
+    installed_paths.append(_append_agent_block(memory_file, "Claude Code"))
     hook_file.write_text(_claude_session_start_hook(), encoding="utf-8")
     settings_file.write_text(json.dumps(_claude_settings(), indent=2), encoding="utf-8")
+    installed_paths.append(f"updated: {hook_file.resolve()}")
+    installed_paths.append(f"updated: {settings_file.resolve()}")
+    return installed_paths
 
 
-def _append_agent_block(path: Path, agent_name: str) -> None:
+def _append_agent_block(path: Path, agent_name: str) -> str:
     marker = f"<!-- remnant:{agent_name.lower().replace(' ', '-')} -->"
     block = f"""
 
@@ -267,9 +275,10 @@ For {agent_name}, use Remnant without copy/paste:
 """
     existing = path.read_text(encoding="utf-8") if path.exists() else f"# {path.stem}\n"
     if marker in existing:
-        return
+        return f"already configured: {path.resolve()}"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(existing.rstrip() + block + "\n", encoding="utf-8")
+    return f"updated: {path.resolve()}"
 
 
 def _claude_memory_text() -> str:
