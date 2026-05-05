@@ -2,5 +2,9 @@ REMNANT.md
 node_modules/
 dist/
 build/
+.venv/
+.pytest_cache/
+__pycache__/
+uv.lock
 .env
 .env.*

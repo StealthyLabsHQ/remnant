@@ -30,6 +30,14 @@ Remnant remembers by writing `REMNANT.md` in the repository root. That makes the
 - editable by humans
 - independent from any single LLM vendor
 
+For many projects, the optional CLI also keeps a decentralized local index:
+
+```text
+~/.remnant/projects.json
+```
+
+That index stores project paths and last `## Next` values so an agent can find recent project memory without using Codex, Claude, Gemini, or any cloud memory.
+
 ## Compatible Agents
 
 Remnant works by giving each agent the instruction file it actually reads, plus the shared `REMNANT.md` memory file.
@@ -41,43 +49,98 @@ Codex (OpenAI)       reads AGENTS.md + REMNANT.md
 Google Antigravity   reads AGENTS.md + REMNANT.md
 ```
 
-## CLI Usage
+## Beginner Setup
 
-Install dependencies:
+You do not need to install a CLI to use Remnant.
+
+Add these files to your project:
+
+```text
+CLAUDE.md             for Claude Code
+AGENTS.md             for Codex and Google Antigravity
+GEMINI.md             for Gemini CLI
+REMNANT.template.md   safe template to commit
+```
+
+Then create your private local memory file:
+
+```text
+copy REMNANT.template.md to REMNANT.md
+```
+
+Keep `REMNANT.md` ignored by Git:
+
+```gitignore
+REMNANT.md
+```
+
+That is enough. The agent instruction file tells the agent to read and update `REMNANT.md`.
+
+## Daily Use
+
+At the start of a new context, tell the agent:
+
+```text
+Read your instruction file and REMNANT.md first, then continue from ## Next.
+```
+
+Before ending or switching context, tell the agent:
+
+```text
+Update REMNANT.md with Done, Failed, State, Next, and Blockers.
+```
+
+## Optional CLI
+
+The CLI is optional. Use it only if you want commands instead of manual editing.
+
+Developer install:
 
 ```bash
 cd packages/cli
-bun install
+uv sync
 ```
 
 Initialize local memory at the repository root:
 
 ```bash
-bun run src/index.ts init --file ../../REMNANT.md
+uv run remnant init --file ../../REMNANT.md
 ```
 
 Save context before switching agents:
 
 ```bash
-bun run src/index.ts capture --file ../../REMNANT.md --next "Describe the exact next step"
+uv run remnant capture --file ../../REMNANT.md --next "Describe the exact next step"
 ```
 
 Inject context into a new LLM session:
 
 ```bash
-bun run src/index.ts inject --file ../../REMNANT.md
+uv run remnant inject --file ../../REMNANT.md
 ```
 
 Check the current memory:
 
 ```bash
-bun run src/index.ts status --file ../../REMNANT.md
+uv run remnant status --file ../../REMNANT.md
+```
+
+List all indexed projects:
+
+```bash
+uv run remnant status --all
+```
+
+Search indexed project memories:
+
+```bash
+uv run remnant status --search "checkout bug"
 ```
 
 Validate future sync readiness:
 
 ```bash
-bun run src/index.ts sync --file ../../REMNANT.md
+uv run remnant sync --file ../../REMNANT.md
 ```
 
 `sync` currently validates `REMNANT.md` and prints a placeholder. Backend sync is intentionally not implemented yet.
@@ -86,15 +149,15 @@ bun run src/index.ts sync --file ../../REMNANT.md
 
 ```text
 packages/cli
-├─ src/index.ts       Commander.js CLI
-├─ src/schema.ts      Zod schema + REMNANT.md parser/renderer
-└─ src/index.test.ts  Bun tests
+├─ src/remnant_cli/main.py    Typer CLI
+├─ src/remnant_cli/schema.py  REMNANT.md parser/renderer
+└─ tests/test_cli.py          pytest coverage
 ```
 
 ## Test
 
 ```bash
 cd packages/cli
-bun install
-bun run test
+uv sync
+uv run pytest
 ```

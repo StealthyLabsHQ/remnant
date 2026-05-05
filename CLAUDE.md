@@ -8,6 +8,7 @@ For Claude Code.
 2. Use `REMNANT.md` as the context map, not as full chat history.
 3. Read only files needed for the current `## Next` task.
 4. If `REMNANT.md` is missing, run `remnant init` or copy `REMNANT.template.md`.
+5. If the user is switching between many projects, use `remnant status --all` or `remnant status --search <query>` to find indexed local project memories.
 
 ## Required shutdown
 
@@ -21,6 +22,7 @@ Before final response, update `REMNANT.md` with a compact, non-sensitive snapsho
 
 Do not store secrets, credentials, tokens, private chat text, personal data, or irrelevant logs in `REMNANT.md`.
 Do not commit `REMNANT.md`; it is local-only memory and must stay ignored by Git.
+The global index at `~/.remnant/projects.json` is local-only and should contain only project paths plus short `Next` summaries.
 
 ## REMNANT.md schema
 
@@ -51,7 +53,7 @@ Do not commit `REMNANT.md`; it is local-only memory and must stay ignored by Git
 ## Project shape
 
 ```text
-packages/cli      Bun + TypeScript CLI
+packages/cli      Python/uv + Typer CLI
 packages/backend  future Python/FastAPI backend
 ```
 
@@ -59,9 +61,8 @@ packages/backend  future Python/FastAPI backend
 
 ```bash
 cd packages/cli
-bun install
-bun run test
-bun run build
+uv sync
+uv run pytest
 ```
 
 ## Constraints

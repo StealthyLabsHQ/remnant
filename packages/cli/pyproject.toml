@@ -1,0 +1,20 @@
+[project]
+name = "remnant-cli"
+version = "0.1.0"
+description = "Persist AI session context across coding sessions."
+requires-python = ">=3.12"
+dependencies = [
+  "typer>=0.12.5",
+]
+
+[project.scripts]
+remnant = "remnant_cli.main:app"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
