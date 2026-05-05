@@ -1,22 +1,51 @@
 # Remnant — GEMINI.md
 
-You are working on Remnant, a tool that persists AI session context across coding sessions.
+For Gemini CLI.
 
 ## Required startup
 
-- Read `REMNANT.md` before touching files.
-- If `REMNANT.md` does not exist, run `remnant init` first.
-- Keep changes scoped to the current `## Next` section in `REMNANT.md`.
+1. Read `REMNANT.md` before touching files.
+2. Use `REMNANT.md` as the context map, not as full chat history.
+3. Read only files needed for the current `## Next` task.
+4. If `REMNANT.md` is missing, run `remnant init` or create it from the schema below.
 
 ## Required shutdown
 
-Update `REMNANT.md` with:
+Before final response, update `REMNANT.md` with a compact, non-sensitive snapshot:
 
-- what was completed
-- what failed and why
-- current project state
-- exact next step
-- blockers
+- `Done`: completed work only
+- `Failed`: attempted work that failed and why
+- `State`: current implementation state and key file paths
+- `Next`: exact next task for a new context
+- `Blockers`: unresolved decisions or dependencies
+
+Do not store secrets, credentials, tokens, private chat text, personal data, or irrelevant logs in `REMNANT.md`.
+
+## REMNANT.md schema
+
+```markdown
+# Remnant — <project-name>
+
+## Session
+- date: <ISO 8601>
+- agent: <claude-code | codex | gemini-cli | antigravity | other>
+- duration: <minutes>
+
+## Done
+- <completed work>
+
+## Failed
+- <failed attempt and reason>
+
+## State
+- <current state and key files>
+
+## Next
+- <exact next step>
+
+## Blockers
+- <open question or dependency>
+```
 
 ## Project shape
 
@@ -25,7 +54,7 @@ packages/cli      Bun + TypeScript CLI
 packages/backend  future Python/FastAPI backend
 ```
 
-## CLI commands
+## Commands
 
 ```bash
 cd packages/cli
@@ -36,8 +65,10 @@ bun run build
 
 ## Constraints
 
+- Smallest correct change.
 - No new dependencies unless explicitly requested.
 - Do not write `.env`; only `.env.example`.
-- Do not break the backend append-only store when it exists.
-- Raw SQL only for backend work.
+- Do not commit secrets or local-only context.
+- Backend store must remain append-only when implemented.
+- Backend uses raw SQL only.
 - Backend default port: 8421.

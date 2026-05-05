@@ -1,17 +1,25 @@
 # Remnant — AGENTS.md
 
-> Codex equivalent of CLAUDE.md. All architectural decisions are identical — read CLAUDE.md first for full context.
+For Codex and Google Antigravity.
 
-## Agent instructions
+## Required startup
 
-You are working on **Remnant**, a tool that persists AI session context across coding sessions. The goal: zero re-explanation when resuming a project with any AI agent.
+1. Read `REMNANT.md` before touching files.
+2. Use `REMNANT.md` as the context map, not as full chat history.
+3. Read only files needed for the current `## Next` task.
+4. If `REMNANT.md` is missing, run `remnant init` or create it from the schema below.
 
-## What to always do
+## Required shutdown
 
-- Read `REMNANT.md` at the start of every session before touching any file
-- Write `REMNANT.md` at the end of every session using the schema below
-- Never modify files outside the scope defined in `## Next` from the last snapshot
-- If `REMNANT.md` does not exist, run `remnant init` first
+Before final response, update `REMNANT.md` with a compact, non-sensitive snapshot:
+
+- `Done`: completed work only
+- `Failed`: attempted work that failed and why
+- `State`: current implementation state and key file paths
+- `Next`: exact next task for a new context
+- `Blockers`: unresolved decisions or dependencies
+
+Do not store secrets, credentials, tokens, private chat text, personal data, or irrelevant logs in `REMNANT.md`.
 
 ## REMNANT.md schema
 
@@ -20,61 +28,47 @@ You are working on **Remnant**, a tool that persists AI session context across c
 
 ## Session
 - date: <ISO 8601>
-- agent: <claude-code | codex | other>
+- agent: <claude-code | codex | gemini-cli | antigravity | other>
 - duration: <minutes>
 
 ## Done
-- <what was completed this session>
+- <completed work>
 
 ## Failed
-- <what was attempted and didn't work, with reason>
+- <failed attempt and reason>
 
 ## State
-- <current state of the codebase / key files touched>
+- <current state and key files>
 
 ## Next
-- <exact next step to resume>
+- <exact next step>
 
 ## Blockers
-- <unresolved dependency, decision, or question>
+- <open question or dependency>
 ```
 
-## Monorepo structure
+## Project shape
 
-```
-remnant/
-├── packages/
-│   ├── cli/           # TypeScript/Bun — remnant capture | inject | sync | status
-│   └── backend/       # Python/uv — FastAPI + SQLite + Jinja2 dashboard
-├── CLAUDE.md
-├── AGENTS.md
-└── .gitignore
+```text
+packages/cli      Bun + TypeScript CLI
+packages/backend  future Python/FastAPI backend
 ```
 
-## Allowed commands
+## Commands
 
 ```bash
-# CLI
 cd packages/cli
 bun install
-bun run build
 bun run test
-
-# Backend
-cd packages/backend
-uv sync
-uv run pytest
-uv run uvicorn app.main:app --reload --port 8421
+bun run build
 ```
 
 ## Constraints
 
-- Do not install dependencies not listed in package.json or pyproject.toml without flagging it
-- Do not write to .env — only .env.example
-- Do not break the append-only constraint on the backend store
-- Raw SQL only — no ORM
-- Backend port default: 8421
-
-## When blocked
-
-Write the blocker in ## Blockers in REMNANT.md and stop. Do not guess.
+- Smallest correct change.
+- No new dependencies unless explicitly requested.
+- Do not write `.env`; only `.env.example`.
+- Do not commit secrets or local-only context.
+- Backend store must remain append-only when implemented.
+- Backend uses raw SQL only.
+- Backend default port: 8421.
