@@ -7,7 +7,22 @@ $ErrorActionPreference = "Stop"
 if ($Repo) {
   $repo = (Resolve-Path -LiteralPath $Repo).Path
 } else {
-  $repo = Split-Path -Parent $MyInvocation.MyCommand.Path
+  $scriptPath = $MyInvocation.MyCommand.Path
+  $repo = if ($scriptPath) { Split-Path -Parent $scriptPath } else { "" }
+}
+
+if (-not $repo -or -not (Test-Path -LiteralPath (Join-Path $repo "packages\cli\pyproject.toml"))) {
+  if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Error "git is required for one-line install. Install Git first: https://git-scm.com/downloads"
+  }
+
+  $repo = Join-Path $env:USERPROFILE ".remnant\remnant"
+  if (Test-Path -LiteralPath (Join-Path $repo ".git")) {
+    git -C $repo pull --ff-only | Out-Null
+  } else {
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $repo) | Out-Null
+    git clone https://github.com/StealthyLabsHQ/remnant.git $repo | Out-Null
+  }
 }
 
 $cli = Join-Path $repo "packages\cli"

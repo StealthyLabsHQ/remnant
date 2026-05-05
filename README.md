@@ -92,16 +92,14 @@ If you want to type `remnant install claude` in Command Prompt, install the comm
 Windows PowerShell:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\install.ps1
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/StealthyLabsHQ/remnant/main/install.ps1 | iex"
 ```
 
-From any Command Prompt without `cd`, pass the repo path:
+This downloads Remnant from GitHub into:
 
-```cmd
-powershell -ExecutionPolicy Bypass -File "D:\path\to\remnant\install.ps1" -Repo "D:\path\to\remnant"
+```text
+%USERPROFILE%\.remnant\remnant
 ```
-
-For this cloned repo, replace `D:\path\to\remnant` with the folder that contains `README.md`.
 
 Then close and reopen Command Prompt.
 
