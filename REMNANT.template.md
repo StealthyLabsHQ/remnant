@@ -1,4 +1,4 @@
-# Remnant — <project-name>
+# Remnant - <project-name>
 
 ## Session
 - date: <ISO 8601>

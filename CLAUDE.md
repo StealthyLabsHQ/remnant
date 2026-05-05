@@ -1,34 +1,38 @@
-# Remnant — CLAUDE.md
+# Remnant - CLAUDE.md
 
 For Claude Code.
 
 ## Required startup
 
-1. Read `REMNANT.md` before touching files.
-2. Use `REMNANT.md` as the context map, not as full chat history.
-3. Read only files needed for the current `## Next` task.
-4. If `REMNANT.md` is missing, run `remnant init` or copy `REMNANT.template.md`.
-5. If the user is switching between many projects, use `remnant status --all`, `remnant status --search <query>`, or `remnant search <query>` to find indexed local project memories.
-6. If the user says "use remnant", search the local Remnant index first, then read the matching project `REMNANT.md`.
+1. Look for `REMNANT.md` in the current project root.
+2. If `REMNANT.md` exists, read it before touching project files.
+3. If `REMNANT.md` is missing, create it from `REMNANT.template.md`.
+4. If both files are missing, create `REMNANT.md` manually using the schema below.
+5. Use `REMNANT.md` as a compact context map, not as full chat history.
+6. Read only files needed for the current `## Next` task.
 
 ## Required shutdown
 
-Before final response, update `REMNANT.md` with a compact, non-sensitive snapshot:
+Before the final response, update `REMNANT.md` with a compact, non-sensitive handoff:
 
 - `Done`: completed work only
 - `Failed`: attempted work that failed and why
-- `State`: current implementation state and key file paths
+- `State`: current project state and important files
 - `Next`: exact next task for a new context
 - `Blockers`: unresolved decisions or dependencies
 
-Do not store secrets, credentials, tokens, private chat text, personal data, or irrelevant logs in `REMNANT.md`.
-Do not commit `REMNANT.md`; it is local-only memory and must stay ignored by Git.
-The global index at `~/.remnant/projects.json` is local-only and should contain only project paths plus short `Next` summaries.
+## Compression rule
+
+For long sessions, compress the conversation into decisions, changed files, current state, and the next action. Do not write full chat logs.
+
+Never store secrets, credentials, tokens, private chat text, personal data, or irrelevant logs in `REMNANT.md`.
+Never commit `REMNANT.md`; it is local-only memory and must stay ignored by Git.
+Never use Remnant CLI commands; Remnant is Markdown-only.
 
 ## REMNANT.md schema
 
 ```markdown
-# Remnant — <project-name>
+# Remnant - <project-name>
 
 ## Session
 - date: <ISO 8601>
@@ -42,7 +46,7 @@ The global index at `~/.remnant/projects.json` is local-only and should contain 
 - <failed attempt and reason>
 
 ## State
-- <current state and key files>
+- <current state and important files>
 
 ## Next
 - <exact next step>
@@ -54,24 +58,9 @@ The global index at `~/.remnant/projects.json` is local-only and should contain 
 ## Project shape
 
 ```text
-packages/cli      Python/uv + Typer CLI
-packages/backend  future Python/FastAPI backend
+AGENTS.md            Codex and Google Antigravity instructions
+CLAUDE.md            Claude Code instructions
+GEMINI.md            Gemini CLI instructions
+REMNANT.template.md  safe template to commit
+REMNANT.md           local-only memory, ignored by Git
 ```
-
-## Commands
-
-```bash
-cd packages/cli
-uv sync
-uv run pytest
-```
-
-## Constraints
-
-- Smallest correct change.
-- No new dependencies unless explicitly requested.
-- Do not write `.env`; only `.env.example`.
-- Do not commit secrets or local-only context.
-- Backend store must remain append-only when implemented.
-- Backend uses raw SQL only.
-- Backend default port: 8421.

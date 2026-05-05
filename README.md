@@ -1,327 +1,180 @@
 # Remnant
 
-![Remnant CLI-style logo](assets/remnant-logo.png)
+![Remnant logo](assets/remnant-logo.png)
 
-Remnant is a local memory file for AI coding agents. It writes the current project state to an ignored local `REMNANT.md` so a new Claude Code, Codex, Gemini CLI, or Google Antigravity session can resume without asking you to explain the project again.
+No install. No server. No CLI. Just Markdown.
+
+Remnant is a local memory protocol for AI coding agents. It uses one ignored project file, `REMNANT.md`, so a new Claude Code, Codex, Gemini CLI, or Google Antigravity session can resume without asking you to explain the project again.
 
 ## How It Works
 
-Remnant stores context in plain Markdown beside your code:
+Remnant keeps a compact handoff beside your code:
 
 ```text
 REMNANT.md
-├─ Session   date, agent, duration
-├─ Done      what was completed
-├─ Failed    what did not work and why
-├─ State     current codebase state
-├─ Next      exact next step
-└─ Blockers  unresolved questions or dependencies
+|-- Session   date, agent, duration
+|-- Done      completed work
+|-- Failed    failed attempts and reason
+|-- State     current project state and important files
+|-- Next      exact next step
+`-- Blockers  unresolved questions or dependencies
 ```
 
-The file is human-readable first and machine-parseable second. `REMNANT.md` is ignored by Git because it can contain local project context. Commit `REMNANT.template.md`, not `REMNANT.md`.
+The file is human-readable first. Agents use it as a context map, not as full chat history.
 
-## Local Storage
+## Setup
 
-Remnant remembers by writing `REMNANT.md` in the repository root. That makes the memory:
-
-- local to your machine and project
-- visible to any CLI agent that can read files
-- safe from accidental commits
-- editable by humans
-- independent from any single LLM vendor
-
-For many projects, the optional CLI also keeps a decentralized local index:
+Add the instruction file for the agent you use:
 
 ```text
-~/.remnant/projects.json
+AGENTS.md   Codex and Google Antigravity
+CLAUDE.md   Claude Code
+GEMINI.md   Gemini CLI
 ```
 
-That index stores project paths and last `## Next` values so an agent can find recent project memory without using Codex, Claude, Gemini, or any cloud memory.
-
-This is the Remnant version of Context7-style lookup, but local-only:
+Keep the safe template committed:
 
 ```text
-Context7: fetch external docs into an LLM prompt
-Remnant:  find local project memory and read REMNANT.md
+REMNANT.template.md
 ```
 
-No localhost server, no MCP server, no API key, no cloud memory.
-
-## Compatible Agents
-
-Remnant works by giving each agent the instruction file it actually reads, plus the shared `REMNANT.md` memory file.
+Keep the real memory file local:
 
 ```text
-Claude Code          reads CLAUDE.md + REMNANT.md
-Gemini CLI           reads GEMINI.md + REMNANT.md
-Codex (OpenAI)       reads AGENTS.md + REMNANT.md
-Google Antigravity   reads AGENTS.md + REMNANT.md
+REMNANT.md
 ```
 
-## Beginner Setup
-
-You do not need to install a CLI to use Remnant.
-
-Add these files to your project:
-
-```text
-CLAUDE.md             for Claude Code
-AGENTS.md             for Codex and Google Antigravity
-GEMINI.md             for Gemini CLI
-REMNANT.template.md   safe template to commit
-```
-
-Then create your private local memory file:
-
-```text
-copy REMNANT.template.md to REMNANT.md
-```
-
-Keep `REMNANT.md` ignored by Git:
+Add this to `.gitignore`:
 
 ```gitignore
 REMNANT.md
 ```
 
-That is enough. The agent instruction file tells the agent to read and update `REMNANT.md`.
+## Beginner Prompt
 
-## Easy Command Install
-
-If you want to type `remnant install claude` in Command Prompt, install the command once.
-
-Windows PowerShell:
-
-```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/StealthyLabsHQ/remnant/main/install.ps1 | iex"
-```
-
-macOS Terminal:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/StealthyLabsHQ/remnant/main/install.sh | sh
-```
-
-This downloads Remnant from GitHub into:
+At the start of a session, tell the agent:
 
 ```text
-%USERPROFILE%\.remnant\remnant
-~/.remnant/remnant
+Use Remnant. If REMNANT.md is missing, create it from REMNANT.template.md.
+Read it before touching files. Before ending, update it with the final handoff.
 ```
 
-Then close and reopen Command Prompt or Terminal.
+That is enough. The agent instruction file tells the agent how to create, read, and update `REMNANT.md`.
 
-Test:
+## Agent Startup Rule
 
-```bash
-remnant --help
-```
-
-Start the interactive Remnant CLI:
-
-```cmd
-remnant
-```
-
-Then type `/` to show commands:
+Every Remnant-compatible agent instruction file should say:
 
 ```text
-/
-/install claude
-/install codex
-/install gemini
-/install antigravity
-/install all
-/init
-/capture continue the current task
-/sync
-/status
-/search backend
-/exit
+1. Look for REMNANT.md in the current project root.
+2. If REMNANT.md exists, read it before touching project files.
+3. If REMNANT.md is missing, create it from REMNANT.template.md.
+4. If both files are missing, create REMNANT.md manually using the schema.
+5. Use REMNANT.md as a compact context map, not as full chat history.
 ```
 
-Now these work from any project:
+## Agent Shutdown Rule
 
-```cmd
-remnant install claude
-remnant install codex
-remnant install gemini
-remnant install antigravity
-remnant install all
-```
-
-If you run install from your home folder, Remnant installs global agent instructions here:
+Before the final response, the agent updates `REMNANT.md`:
 
 ```text
-%USERPROFILE%\.claude\CLAUDE.md
-%USERPROFILE%\.codex\AGENTS.md
-%USERPROFILE%\.gemini\GEMINI.md
-~/.claude/CLAUDE.md
-~/.codex/AGENTS.md
-~/.gemini/GEMINI.md
+Done      completed work only
+Failed    failed attempts and reason
+State     current project state and important files
+Next      exact next task for a new context
+Blockers  unresolved decisions or dependencies
 ```
 
-Existing `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` content is preserved. Remnant only appends a `## Remnant Integration` section.
+Do not store secrets, credentials, tokens, private chat text, personal data, raw logs, or full chat history.
 
-If you run install inside a project folder, Remnant adds project-local instructions:
+## Long Session Example
 
-```text
-.claude\CLAUDE.md
-AGENTS.md
-GEMINI.md
+After a 50+ message session, do not paste the whole conversation into `REMNANT.md`. Compress it:
+
+```markdown
+# Remnant - remnant
+
+## Session
+- date: 2026-05-05T12:00:00Z
+- agent: codex
+- duration: 90
+
+## Done
+- Repositioned Remnant as a Markdown-only protocol.
+- Removed the CLI and install scripts.
+- Updated agent instruction files to create and maintain REMNANT.md directly.
+
+## Failed
+- CLI-based install flow confused users because it looked successful without obvious files.
+
+## State
+- Public docs now lead with zero-install Markdown usage.
+- `REMNANT.md` is local-only and ignored by Git.
+- `REMNANT.template.md` is the committed safe starting point.
+
+## Next
+- Review the README for beginner clarity and publish the Markdown-only direction.
+
+## Blockers
+- None.
 ```
 
-Project-local instruction files are append-only too. Remnant does not delete or rewrite your existing rules.
+This preserves what matters for the next context without storing the full conversation.
 
-If `remnant` is not recognized, the PATH update has not loaded yet. Open a new Command Prompt or Terminal and try again.
+## Schema
 
-## No Paste Setup For Claude Code
+```markdown
+# Remnant - <project-name>
 
-Remnant can add persistent project instructions so you do not need to paste "read REMNANT.md" every time.
+## Session
+- date: <ISO 8601>
+- agent: <claude-code | codex | gemini-cli | antigravity | other>
+- duration: <minutes>
 
-For Claude Code, Remnant writes `.claude` integration files and appends a Remnant block to root `CLAUDE.md`:
+## Done
+- <completed work>
 
-```bash
-remnant install claude
+## Failed
+- <failed attempt and reason>
+
+## State
+- <current state and important files>
+
+## Next
+- <exact next step>
+
+## Blockers
+- <open question or dependency>
 ```
 
-This creates:
+## Security
 
-```text
-.claude/CLAUDE.md
-.claude/settings.json
-.claude/hooks/remnant_session_start.py
-```
+`REMNANT.md` is local-only memory. It should stay ignored by Git.
 
-Claude Code loads `.claude/CLAUDE.md` at startup. The `SessionStart` hook also injects local `REMNANT.md` into Claude's context automatically, so you do not need to paste "read REMNANT.md" every time.
+Good content:
 
-Use `--force` to overwrite existing Remnant-managed Claude files:
+- decisions
+- changed files
+- current project state
+- exact next action
+- blockers
 
-```bash
-remnant install claude --force
-```
+Bad content:
 
-`--force` only overwrites Remnant-managed `.claude/settings.json` and `.claude/hooks/remnant_session_start.py`. It still appends to instruction Markdown files instead of replacing them.
-
-For Codex:
-
-```bash
-remnant install codex
-```
-
-This appends a Remnant block to root `AGENTS.md`.
-
-For Google Antigravity:
-
-```bash
-remnant install antigravity
-```
-
-This appends a Remnant block to root `AGENTS.md`.
-
-For Gemini CLI:
-
-```bash
-remnant install gemini
-```
-
-This appends a Remnant block to root `GEMINI.md`.
-
-Install every supported local integration:
-
-```bash
-remnant install all
-```
-
-## Daily Use
-
-At the start of a new context, tell the agent:
-
-```text
-Read your instruction file and REMNANT.md first, then continue from ## Next.
-```
-
-Before ending or switching context, tell the agent:
-
-```text
-Update REMNANT.md with Done, Failed, State, Next, and Blockers.
-```
-
-## Optional CLI
-
-The CLI is optional. Use it only if you want commands instead of manual editing.
-
-Developer install:
-
-```bash
-cd packages/cli
-uv sync
-```
-
-Initialize local memory at the repository root:
-
-```bash
-uv run remnant init --file ../../REMNANT.md
-```
-
-Do not run `remnant init` from your home folder. Run it inside a project folder so `REMNANT.md` belongs to that project.
-
-Save context before switching agents:
-
-```bash
-uv run remnant capture --file ../../REMNANT.md --next "Describe the exact next step"
-```
-
-Inject context into a new LLM session:
-
-```bash
-uv run remnant inject --file ../../REMNANT.md
-```
-
-Check the current memory:
-
-```bash
-uv run remnant status --file ../../REMNANT.md
-```
-
-List all indexed projects:
-
-```bash
-uv run remnant status --all
-```
-
-Search indexed project memories:
-
-```bash
-uv run remnant status --search "checkout bug"
-```
-
-Or use the shorter search command:
-
-```bash
-uv run remnant search "checkout bug"
-```
-
-Validate future sync readiness:
-
-```bash
-uv run remnant sync --file ../../REMNANT.md
-```
-
-`sync` currently validates `REMNANT.md` and prints a placeholder. Backend sync is intentionally not implemented yet.
+- secrets
+- API keys
+- credentials
+- private chat logs
+- personal data
+- raw terminal dumps
+- irrelevant history
 
 ## Current Package
 
 ```text
-packages/cli
-├─ src/remnant_cli/main.py    Typer CLI
-├─ src/remnant_cli/schema.py  REMNANT.md parser/renderer
-└─ tests/test_cli.py          pytest coverage
-```
-
-## Test
-
-```bash
-cd packages/cli
-uv sync
-uv run pytest
+AGENTS.md            Codex and Google Antigravity instructions
+CLAUDE.md            Claude Code instructions
+GEMINI.md            Gemini CLI instructions
+REMNANT.template.md  safe template to commit
+REMNANT.md           local-only memory, ignored by Git
 ```
