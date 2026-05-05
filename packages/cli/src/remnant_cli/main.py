@@ -105,6 +105,12 @@ def status(
     )
 
 
+@app.command()
+def search(query: str) -> None:
+    """Search local Remnant project memories."""
+    typer.echo(_format_project_index(query))
+
+
 def _read_remnant(file: str):
     path = Path(file).resolve()
     if not path.exists():

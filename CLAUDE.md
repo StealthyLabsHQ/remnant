@@ -8,7 +8,8 @@ For Claude Code.
 2. Use `REMNANT.md` as the context map, not as full chat history.
 3. Read only files needed for the current `## Next` task.
 4. If `REMNANT.md` is missing, run `remnant init` or copy `REMNANT.template.md`.
-5. If the user is switching between many projects, use `remnant status --all` or `remnant status --search <query>` to find indexed local project memories.
+5. If the user is switching between many projects, use `remnant status --all`, `remnant status --search <query>`, or `remnant search <query>` to find indexed local project memories.
+6. If the user says "use remnant", search the local Remnant index first, then read the matching project `REMNANT.md`.
 
 ## Required shutdown
 

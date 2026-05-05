@@ -38,6 +38,15 @@ For many projects, the optional CLI also keeps a decentralized local index:
 
 That index stores project paths and last `## Next` values so an agent can find recent project memory without using Codex, Claude, Gemini, or any cloud memory.
 
+This is the Remnant version of Context7-style lookup, but local-only:
+
+```text
+Context7: fetch external docs into an LLM prompt
+Remnant:  find local project memory and read REMNANT.md
+```
+
+No localhost server, no MCP server, no API key, no cloud memory.
+
 ## Compatible Agents
 
 Remnant works by giving each agent the instruction file it actually reads, plus the shared `REMNANT.md` memory file.
@@ -135,6 +144,12 @@ Search indexed project memories:
 
 ```bash
 uv run remnant status --search "checkout bug"
+```
+
+Or use the shorter search command:
+
+```bash
+uv run remnant search "checkout bug"
 ```
 
 Validate future sync readiness:

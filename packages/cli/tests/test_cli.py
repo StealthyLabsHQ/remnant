@@ -114,6 +114,18 @@ def test_status_search_filters_indexed_projects(tmp_path: Path, monkeypatch: Mon
     assert "rewrite install docs" in result.stdout
 
 
+def test_search_lists_matching_indexed_projects(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setenv("REMNANT_HOME", str(tmp_path / ".remnant-home"))
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(app, ["init"], catch_exceptions=False)
+    runner.invoke(app, ["capture", "--next", "continue backend sync"], catch_exceptions=False)
+    result = runner.invoke(app, ["search", "backend"], catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert "continue backend sync" in result.stdout
+    assert "REMNANT.md:" in result.stdout
+
+
 def test_status_fails_clearly_when_remnant_is_invalid(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
     (tmp_path / "REMNANT.md").write_text("invalid", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
