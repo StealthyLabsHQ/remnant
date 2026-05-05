@@ -4,11 +4,11 @@
 
 No install. No server. No CLI. Just Markdown.
 
-Remnant is a local memory protocol for AI coding agents. It uses one ignored project file, `REMNANT.md`, so a new Claude Code, Codex, Gemini CLI, or Google Antigravity session can resume without asking you to explain the project again.
+Remnant is a session memory protocol for AI coding agents. One ignored file, `REMNANT.md`, lets Claude Code, Codex, Gemini CLI, or Antigravity resume a session without asking you to re-explain the project.
 
 ## How It Works
 
-Remnant keeps a compact handoff beside your code:
+The agent reads `REMNANT.md` at startup and writes a compact handoff before ending:
 
 ```text
 REMNANT.md
@@ -20,62 +20,62 @@ REMNANT.md
 `-- Blockers  unresolved questions or dependencies
 ```
 
-The file is human-readable first. Agents use it as a context map, not as full chat history.
+The file is human-readable. Agents use it as a context map, not as full chat history.
 
 ## Setup
 
-Add the instruction file for the agent you use:
+**1. Copy the instruction file for your agent into your project root:**
 
-```text
-AGENTS.md   Codex and Google Antigravity
-CLAUDE.md   Claude Code
-GEMINI.md   Gemini CLI
-```
+| Agent | File |
+|-------|------|
+| Claude Code | `CLAUDE.md` |
+| Codex / Antigravity | `AGENTS.md` |
+| Gemini CLI | `GEMINI.md` |
 
-Keep the safe template committed:
+**2. Copy `REMNANT.template.md` into your project root.**
 
-```text
-REMNANT.template.md
-```
-
-Keep the real memory file local:
-
-```text
-REMNANT.md
-```
-
-Add this to `.gitignore`:
+**3. Add `REMNANT.md` to `.gitignore`:**
 
 ```gitignore
 REMNANT.md
 ```
 
-## Beginner Prompt
+`REMNANT.md` is created automatically the first time the agent runs.
 
-At the start of a session, tell the agent:
+## Starting a Session
+
+Tell the agent once at the start of a new project:
 
 ```text
 Use Remnant. If REMNANT.md is missing, create it from REMNANT.template.md.
 Read it before touching files. Before ending, update it with the final handoff.
 ```
 
-That is enough. The agent instruction file tells the agent how to create, read, and update `REMNANT.md`.
+After that, the instruction files handle startup and shutdown automatically.
 
-## Agent Startup Rule
+## When Context Is Getting Full
 
-Every Remnant-compatible agent instruction file should say:
+If a session runs long or the context window is filling up, ask the agent to compress:
 
 ```text
-1. Look for REMNANT.md in the current project root.
-2. If REMNANT.md exists, read it before touching project files.
-3. If REMNANT.md is missing, create it from REMNANT.template.md.
-4. If both files are missing, create REMNANT.md manually using the schema.
-5. Use REMNANT.md as a compact context map, not as full chat history.
+Compress the session into REMNANT.md: decisions, changed files, current state, exact next step, blockers.
 ```
 
-## Agent Shutdown Rule
+The agent writes a summary, not a transcript. It captures only what a new agent needs to continue.
 
-Before the final response, the agent updates `REMNANT.md`:
+## Agent Rules
+
+### Startup
+
+1. Look for `REMNANT.md` in the project root.
+2. If it exists, read it before touching any files.
+3. If it is missing, create it from `REMNANT.template.md`.
+4. If both are missing, create `REMNANT.md` using the schema below.
+5. Read only files needed for the current `## Next` task.
+
+### Shutdown
+
+Before the final response, update `REMNANT.md`:
 
 ```text
 Done      completed work only
@@ -85,11 +85,9 @@ Next      exact next task for a new context
 Blockers  unresolved decisions or dependencies
 ```
 
-Do not store secrets, credentials, tokens, private chat text, personal data, raw logs, or full chat history.
+## Example
 
-## Long Session Example
-
-After a 50+ message session, do not paste the whole conversation into `REMNANT.md`. Compress it:
+A compressed handoff after a long session:
 
 ```markdown
 # Remnant - remnant
@@ -119,8 +117,6 @@ After a 50+ message session, do not paste the whole conversation into `REMNANT.m
 - None.
 ```
 
-This preserves what matters for the next context without storing the full conversation.
-
 ## Schema
 
 ```markdown
@@ -149,27 +145,22 @@ This preserves what matters for the next context without storing the full conver
 
 ## Security
 
-`REMNANT.md` is local-only memory. It should stay ignored by Git.
+`REMNANT.md` is local-only. Keep it in `.gitignore`.
 
-Good content:
-
-- decisions
-- changed files
+Write:
+- decisions and rationale
+- changed file paths
 - current project state
 - exact next action
 - blockers
 
-Bad content:
-
-- secrets
-- API keys
-- credentials
-- private chat logs
-- personal data
-- raw terminal dumps
+Never write:
+- secrets, API keys, credentials
+- private chat logs or personal data
+- raw terminal output or build logs
 - irrelevant history
 
-## Current Package
+## Files
 
 ```text
 AGENTS.md            Codex and Google Antigravity instructions

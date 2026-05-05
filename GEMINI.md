@@ -23,10 +23,17 @@ Before the final response, update `REMNANT.md` with a compact, non-sensitive han
 
 ## Compression rule
 
-For long sessions, compress the conversation into decisions, changed files, current state, and the next action. Do not write full chat logs.
+Apply when: session exceeds 30 messages, context is approaching its limit, or the user requests it.
 
-Never store secrets, credentials, tokens, private chat text, personal data, or irrelevant logs in `REMNANT.md`.
-Never commit `REMNANT.md`; it is local-only memory and must stay ignored by Git.
+Steps:
+1. Summarize decisions — what was decided and why, not the full discussion.
+2. List changed files — paths only, no diffs or content.
+3. Capture current state — what works, what is broken, what is in progress.
+4. Write the exact next step — specific enough for a new agent to start without reading the conversation.
+5. Record blockers — unresolved questions, decisions needed, or dependencies.
+
+Never store secrets, credentials, tokens, private chat text, personal data, raw terminal output, or full conversation logs in `REMNANT.md`.
+Never commit `REMNANT.md`; it is local-only and must stay in `.gitignore`.
 Never use Remnant CLI commands; Remnant is Markdown-only.
 
 ## REMNANT.md schema
