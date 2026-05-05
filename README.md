@@ -109,6 +109,28 @@ Test:
 remnant --help
 ```
 
+Start the interactive Remnant CLI:
+
+```cmd
+remnant
+```
+
+Then type:
+
+```text
+/install claude
+/install codex
+/install gemini
+/install antigravity
+/install all
+/init
+/capture continue the current task
+/sync
+/status
+/search backend
+/exit
+```
+
 Now these work from any project:
 
 ```cmd

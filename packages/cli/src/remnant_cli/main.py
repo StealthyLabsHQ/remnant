@@ -3,6 +3,7 @@ from __future__ import annotations
 import subprocess
 import sys
 import json
+import shlex
 from dataclasses import replace
 from pathlib import Path
 from typing import Annotated, Literal
@@ -17,8 +18,15 @@ from remnant_cli.schema import (
     validate_remnant,
 )
 
-app = typer.Typer(help="Persist AI session context across coding sessions.")
+app = typer.Typer(help="Persist AI session context across coding sessions.", invoke_without_command=True)
 DEFAULT_FILE = "REMNANT.md"
+
+
+@app.callback(invoke_without_command=True)
+def root(ctx: typer.Context) -> None:
+    """Open Remnant shell when no command is provided."""
+    if ctx.invoked_subcommand is None:
+        _run_shell()
 
 
 @app.command()
@@ -421,6 +429,87 @@ def _now_iso() -> str:
 def _fail(message: str) -> None:
     typer.echo(message, err=True)
     raise typer.Exit(1)
+
+
+def _run_shell() -> None:
+    typer.echo("Remnant CLI. Type /help for commands, /exit to quit.")
+    while True:
+        try:
+            raw = input("remnant> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            typer.echo("")
+            return
+
+        if not raw:
+            continue
+
+        if raw in ("/exit", "exit", "quit", "/quit"):
+            return
+
+        if raw == "/help":
+            typer.echo(_shell_help())
+            continue
+
+        if not raw.startswith("/"):
+            typer.echo("Use slash commands, for example /install claude or /init.")
+            continue
+
+        _run_shell_command(raw)
+
+
+def _run_shell_command(raw: str) -> None:
+    parts = shlex.split(raw[1:], posix=False)
+    if not parts:
+        return
+
+    command = parts[0]
+    args = parts[1:]
+
+    try:
+        if command == "install":
+            if not args:
+                typer.echo("Usage: /install <claude|codex|gemini|antigravity|all>")
+                return
+            agent = args[0]
+            if agent not in {"claude", "codex", "gemini", "antigravity", "all"}:
+                typer.echo("Usage: /install <claude|codex|gemini|antigravity|all>")
+                return
+            install(agent)  # type: ignore[arg-type]
+        elif command == "init":
+            init()
+        elif command == "sync":
+            sync()
+        elif command == "status":
+            status(all="--all" in args)
+        elif command == "search":
+            query = " ".join(args).strip()
+            if not query:
+                typer.echo("Usage: /search <query>")
+                return
+            search(query)
+        elif command == "inject":
+            inject()
+        elif command == "capture":
+            next_value = " ".join(args).strip()
+            capture(next=next_value or None)
+        else:
+            typer.echo(f"Unknown command: /{command}. Type /help.")
+    except typer.Exit:
+        return
+
+
+def _shell_help() -> str:
+    return """Commands:
+/install <claude|codex|gemini|antigravity|all>
+/init
+/capture <next step>
+/inject
+/sync
+/status
+/status --all
+/search <query>
+/exit
+"""
 
 
 if __name__ == "__main__":

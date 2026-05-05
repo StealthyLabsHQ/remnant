@@ -31,6 +31,22 @@ def test_init_creates_valid_markdown(tmp_path: Path, monkeypatch: MonkeyPatch) -
     assert (tmp_path / ".remnant-home" / "projects.json").exists()
 
 
+def test_no_command_opens_interactive_shell_and_exits() -> None:
+    result = runner.invoke(app, input="/help\n/exit\n", catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert "Remnant CLI" in result.stdout
+    assert "/install <claude|codex|gemini|antigravity|all>" in result.stdout
+
+
+def test_interactive_install_codex(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(app, input="/install codex\n/exit\n", catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert (tmp_path / "AGENTS.md").exists()
+
+
 def test_capture_includes_git_derived_state(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setenv("REMNANT_HOME", str(tmp_path / ".remnant-home"))
     _git(tmp_path, "init")
