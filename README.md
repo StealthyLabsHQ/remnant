@@ -1,15 +1,6 @@
 # Remnant
 
-```text
-██████╗ ███████╗███╗   ███╗███╗   ██╗ █████╗ ███╗   ██╗████████╗
-██╔══██╗██╔════╝████╗ ████║████╗  ██║██╔══██╗████╗  ██║╚══██╔══╝
-██████╔╝█████╗  ██╔████╔██║██╔██╗ ██║███████║██╔██╗ ██║   ██║
-██╔══██╗██╔══╝  ██║╚██╔╝██║██║╚██╗██║██╔══██║██║╚██╗██║   ██║
-██║  ██║███████╗██║ ╚═╝ ██║██║ ╚████║██║  ██║██║ ╚████║   ██║
-╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝
-
-LOCAL MEMORY FOR AI CODING SESSIONS
-```
+![Remnant futuristic AI CLI logo](assets/remnant-logo.png)
 
 Remnant is a local memory file for AI coding agents. It writes the current project state to an ignored local `REMNANT.md` so a new Claude Code, Codex, Gemini CLI, or Google Antigravity session can resume without asking you to explain the project again.
 
