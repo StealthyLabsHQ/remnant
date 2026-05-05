@@ -95,6 +95,14 @@ Windows PowerShell:
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
+From any Command Prompt without `cd`, pass the repo path:
+
+```cmd
+powershell -ExecutionPolicy Bypass -File "D:\path\to\remnant\install.ps1" -Repo "D:\path\to\remnant"
+```
+
+For this cloned repo, replace `D:\path\to\remnant` with the folder that contains `README.md`.
+
 Then close and reopen Command Prompt.
 
 Test:
