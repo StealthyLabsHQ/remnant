@@ -11,11 +11,11 @@
 LOCAL MEMORY FOR AI CODING SESSIONS
 ```
 
-Remnant is a local memory file for AI coding agents. It writes the current project state to `REMNANT.md` so a new Claude Code, Codex, Gemini CLI, or Google Antigravity session can resume without asking you to explain the project again.
+Remnant is a local memory file for AI coding agents. It writes the current project state to an ignored local `REMNANT.md` so a new Claude Code, Codex, Gemini CLI, or Google Antigravity session can resume without asking you to explain the project again.
 
 ## How It Works
 
-Remnant stores context in plain Markdown, committed beside your code:
+Remnant stores context in plain Markdown beside your code:
 
 ```text
 REMNANT.md
@@ -27,7 +27,7 @@ REMNANT.md
 └─ Blockers  unresolved questions or dependencies
 ```
 
-The file is human-readable first and machine-parseable second. Nothing is sent anywhere unless a future backend sync is explicitly used.
+The file is human-readable first and machine-parseable second. `REMNANT.md` is ignored by Git because it can contain local project context. Commit `REMNANT.template.md`, not `REMNANT.md`.
 
 ## Local Storage
 
@@ -35,7 +35,7 @@ Remnant remembers by writing `REMNANT.md` in the repository root. That makes the
 
 - local to your machine and project
 - visible to any CLI agent that can read files
-- portable through git commits
+- safe from accidental commits
 - editable by humans
 - independent from any single LLM vendor
 
@@ -59,7 +59,7 @@ cd packages/cli
 bun install
 ```
 
-Initialize memory at the repository root:
+Initialize local memory at the repository root:
 
 ```bash
 bun run src/index.ts init --file ../../REMNANT.md

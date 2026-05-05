@@ -7,7 +7,7 @@ For Claude Code.
 1. Read `REMNANT.md` before touching files.
 2. Use `REMNANT.md` as the context map, not as full chat history.
 3. Read only files needed for the current `## Next` task.
-4. If `REMNANT.md` is missing, run `remnant init` or create it from the schema below.
+4. If `REMNANT.md` is missing, run `remnant init` or copy `REMNANT.template.md`.
 
 ## Required shutdown
 
@@ -20,6 +20,7 @@ Before final response, update `REMNANT.md` with a compact, non-sensitive snapsho
 - `Blockers`: unresolved decisions or dependencies
 
 Do not store secrets, credentials, tokens, private chat text, personal data, or irrelevant logs in `REMNANT.md`.
+Do not commit `REMNANT.md`; it is local-only memory and must stay ignored by Git.
 
 ## REMNANT.md schema
 
