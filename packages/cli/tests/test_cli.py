@@ -128,6 +128,7 @@ def test_search_lists_matching_indexed_projects(tmp_path: Path, monkeypatch: Mon
 
 def test_install_claude_creates_project_integration(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
+    (tmp_path / "CLAUDE.md").write_text("# Existing Claude\n", encoding="utf-8")
     result = runner.invoke(app, ["install", "claude"], catch_exceptions=False)
 
     assert result.exit_code == 0
@@ -137,6 +138,9 @@ def test_install_claude_creates_project_integration(tmp_path: Path, monkeypatch:
     settings = (tmp_path / ".claude" / "settings.json").read_text(encoding="utf-8")
     assert "SessionStart" in settings
     assert "remnant_session_start.py" in settings
+    root_claude = (tmp_path / "CLAUDE.md").read_text(encoding="utf-8")
+    assert "# Existing Claude" in root_claude
+    assert "## Remnant Integration" in root_claude
 
 
 def test_install_claude_requires_force_for_existing_files(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
@@ -146,6 +150,42 @@ def test_install_claude_requires_force_for_existing_files(tmp_path: Path, monkey
 
     assert result.exit_code == 1
     assert "--force" in result.stderr
+
+
+def test_install_codex_appends_agents_md(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "AGENTS.md").write_text("# Existing Agents\n", encoding="utf-8")
+    result = runner.invoke(app, ["install", "codex"], catch_exceptions=False)
+    content = (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert result.exit_code == 0
+    assert "# Existing Agents" in content
+    assert "For Codex" in content
+    assert "## Remnant Integration" in content
+
+
+def test_install_gemini_appends_gemini_md(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "GEMINI.md").write_text("# Existing Gemini\n", encoding="utf-8")
+    result = runner.invoke(app, ["install", "gemini"], catch_exceptions=False)
+    content = (tmp_path / "GEMINI.md").read_text(encoding="utf-8")
+
+    assert result.exit_code == 0
+    assert "# Existing Gemini" in content
+    assert "For Gemini CLI" in content
+    assert "## Remnant Integration" in content
+
+
+def test_install_all_appends_without_duplicate_blocks(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(app, ["install", "all"], catch_exceptions=False)
+    rerun = runner.invoke(app, ["install", "all", "--force"], catch_exceptions=False)
+    agents = (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert result.exit_code == 0
+    assert rerun.exit_code == 0
+    assert agents.count("For Codex") == 1
+    assert agents.count("For Google Antigravity") == 1
 
 
 def test_status_fails_clearly_when_remnant_is_invalid(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:

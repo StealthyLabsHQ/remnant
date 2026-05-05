@@ -113,13 +113,23 @@ def search(query: str) -> None:
 
 @app.command()
 def install(
-    agent: Annotated[Literal["claude"], typer.Argument(help="agent integration to install")],
+    agent: Annotated[
+        Literal["claude", "codex", "gemini", "antigravity", "all"],
+        typer.Argument(help="agent integration to install"),
+    ],
     force: Annotated[bool, typer.Option("--force", help="overwrite existing Remnant-managed files")] = False,
 ) -> None:
     """Install agent integration files."""
-    if agent == "claude":
+    if agent in ("claude", "all"):
         _install_claude(force)
-        typer.echo("Installed Claude Code Remnant integration")
+        _append_agent_block(Path("CLAUDE.md"), "Claude Code")
+    if agent in ("codex", "all"):
+        _append_agent_block(Path("AGENTS.md"), "Codex")
+    if agent in ("antigravity", "all"):
+        _append_agent_block(Path("AGENTS.md"), "Google Antigravity")
+    if agent in ("gemini", "all"):
+        _append_agent_block(Path("GEMINI.md"), "Gemini CLI")
+    typer.echo(f"Installed {agent} Remnant integration")
 
 
 def _read_remnant(file: str):
@@ -177,6 +187,28 @@ def _install_claude(force: bool) -> None:
     memory_file.write_text(_claude_memory_text(), encoding="utf-8")
     hook_file.write_text(_claude_session_start_hook(), encoding="utf-8")
     settings_file.write_text(json.dumps(_claude_settings(), indent=2), encoding="utf-8")
+
+
+def _append_agent_block(path: Path, agent_name: str) -> None:
+    marker = f"<!-- remnant:{agent_name.lower().replace(' ', '-')} -->"
+    block = f"""
+
+{marker}
+## Remnant Integration
+
+For {agent_name}, use Remnant without copy/paste:
+
+1. At startup, read `REMNANT.md` before touching files.
+2. Use `REMNANT.md` as the local project memory map.
+3. If `REMNANT.md` is missing, create it from `REMNANT.template.md`.
+4. Before final response, update `REMNANT.md` with `Done`, `Failed`, `State`, `Next`, and `Blockers`.
+5. Never commit `REMNANT.md`; it is local-only and ignored by Git.
+6. If the user says "use remnant", search local memories with `remnant search <query>` and then read the matching `REMNANT.md`.
+"""
+    existing = path.read_text(encoding="utf-8") if path.exists() else f"# {path.stem}\n"
+    if marker in existing:
+        return
+    path.write_text(existing.rstrip() + block + "\n", encoding="utf-8")
 
 
 def _claude_memory_text() -> str:

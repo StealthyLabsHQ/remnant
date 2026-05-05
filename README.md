@@ -87,7 +87,9 @@ That is enough. The agent instruction file tells the agent to read and update `R
 
 ## No Paste Setup For Claude Code
 
-For Claude Code, Remnant can write a project `.claude` integration:
+Remnant can add persistent project instructions so you do not need to paste "read REMNANT.md" every time.
+
+For Claude Code, Remnant writes `.claude` integration files and appends a Remnant block to root `CLAUDE.md`:
 
 ```bash
 uv run remnant install claude
@@ -107,6 +109,36 @@ Use `--force` to overwrite existing Remnant-managed Claude files:
 
 ```bash
 uv run remnant install claude --force
+```
+
+For Codex:
+
+```bash
+uv run remnant install codex
+```
+
+This appends a Remnant block to root `AGENTS.md`.
+
+For Google Antigravity:
+
+```bash
+uv run remnant install antigravity
+```
+
+This appends a Remnant block to root `AGENTS.md`.
+
+For Gemini CLI:
+
+```bash
+uv run remnant install gemini
+```
+
+This appends a Remnant block to root `GEMINI.md`.
+
+Install every supported local integration:
+
+```bash
+uv run remnant install all
 ```
 
 ## Daily Use
