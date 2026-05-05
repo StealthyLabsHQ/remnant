@@ -85,6 +85,30 @@ REMNANT.md
 
 That is enough. The agent instruction file tells the agent to read and update `REMNANT.md`.
 
+## No Paste Setup For Claude Code
+
+For Claude Code, Remnant can write a project `.claude` integration:
+
+```bash
+uv run remnant install claude
+```
+
+This creates:
+
+```text
+.claude/CLAUDE.md
+.claude/settings.json
+.claude/hooks/remnant_session_start.py
+```
+
+Claude Code loads `.claude/CLAUDE.md` at startup. The `SessionStart` hook also injects local `REMNANT.md` into Claude's context automatically, so you do not need to paste "read REMNANT.md" every time.
+
+Use `--force` to overwrite existing Remnant-managed Claude files:
+
+```bash
+uv run remnant install claude --force
+```
+
 ## Daily Use
 
 At the start of a new context, tell the agent:

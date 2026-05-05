@@ -126,6 +126,28 @@ def test_search_lists_matching_indexed_projects(tmp_path: Path, monkeypatch: Mon
     assert "REMNANT.md:" in result.stdout
 
 
+def test_install_claude_creates_project_integration(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(app, ["install", "claude"], catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert (tmp_path / ".claude" / "CLAUDE.md").exists()
+    assert (tmp_path / ".claude" / "settings.json").exists()
+    assert (tmp_path / ".claude" / "hooks" / "remnant_session_start.py").exists()
+    settings = (tmp_path / ".claude" / "settings.json").read_text(encoding="utf-8")
+    assert "SessionStart" in settings
+    assert "remnant_session_start.py" in settings
+
+
+def test_install_claude_requires_force_for_existing_files(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(app, ["install", "claude"], catch_exceptions=False)
+    result = runner.invoke(app, ["install", "claude"], catch_exceptions=False)
+
+    assert result.exit_code == 1
+    assert "--force" in result.stderr
+
+
 def test_status_fails_clearly_when_remnant_is_invalid(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
     (tmp_path / "REMNANT.md").write_text("invalid", encoding="utf-8")
     monkeypatch.chdir(tmp_path)

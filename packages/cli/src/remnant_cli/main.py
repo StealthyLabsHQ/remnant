@@ -5,7 +5,7 @@ import sys
 import json
 from dataclasses import replace
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 import typer
 
@@ -111,6 +111,17 @@ def search(query: str) -> None:
     typer.echo(_format_project_index(query))
 
 
+@app.command()
+def install(
+    agent: Annotated[Literal["claude"], typer.Argument(help="agent integration to install")],
+    force: Annotated[bool, typer.Option("--force", help="overwrite existing Remnant-managed files")] = False,
+) -> None:
+    """Install agent integration files."""
+    if agent == "claude":
+        _install_claude(force)
+        typer.echo("Installed Claude Code Remnant integration")
+
+
 def _read_remnant(file: str):
     path = Path(file).resolve()
     if not path.exists():
@@ -149,6 +160,88 @@ def _run_git(cwd: Path, args: list[str]) -> str | None:
         return None
     output = result.stdout.strip()
     return output or None
+
+
+def _install_claude(force: bool) -> None:
+    claude_dir = Path(".claude")
+    hooks_dir = claude_dir / "hooks"
+    memory_file = claude_dir / "CLAUDE.md"
+    settings_file = claude_dir / "settings.json"
+    hook_file = hooks_dir / "remnant_session_start.py"
+
+    for path in (memory_file, settings_file, hook_file):
+        if path.exists() and not force:
+            _fail(f"{path} already exists. Use --force to overwrite.")
+
+    hooks_dir.mkdir(parents=True, exist_ok=True)
+    memory_file.write_text(_claude_memory_text(), encoding="utf-8")
+    hook_file.write_text(_claude_session_start_hook(), encoding="utf-8")
+    settings_file.write_text(json.dumps(_claude_settings(), indent=2), encoding="utf-8")
+
+
+def _claude_memory_text() -> str:
+    return """# Remnant Claude Code Memory
+
+At startup, use the Remnant session context injected by the SessionStart hook.
+
+Rules:
+- Read `REMNANT.md` before touching project files.
+- Use `REMNANT.md` as a compact context map, not full chat history.
+- If `REMNANT.md` is missing, create it from `REMNANT.template.md`.
+- Before final response, update `REMNANT.md` with `Done`, `Failed`, `State`, `Next`, and `Blockers`.
+- Never store secrets, credentials, tokens, private chat text, personal data, or irrelevant logs in `REMNANT.md`.
+- Never commit `REMNANT.md`; it is local-only memory.
+"""
+
+
+def _claude_settings() -> dict:
+    return {
+        "hooks": {
+            "SessionStart": [
+                {
+                    "matcher": "startup",
+                    "hooks": [
+                        {
+                            "type": "command",
+                            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/remnant_session_start.py\"",
+                        }
+                    ],
+                },
+                {
+                    "matcher": "resume",
+                    "hooks": [
+                        {
+                            "type": "command",
+                            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/remnant_session_start.py\"",
+                        }
+                    ],
+                },
+            ]
+        }
+    }
+
+
+def _claude_session_start_hook() -> str:
+    return '''from __future__ import annotations
+
+import os
+from pathlib import Path
+
+project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR", ".")).resolve()
+remnant_path = project_dir / "REMNANT.md"
+
+if not remnant_path.exists():
+    print("Remnant: REMNANT.md is missing. Create it from REMNANT.template.md before relying on saved context.")
+    raise SystemExit(0)
+
+content = remnant_path.read_text(encoding="utf-8")
+print(f"""Remnant local context loaded from {remnant_path}.
+
+Use this as the project memory map. Before final response, update REMNANT.md.
+
+{content}
+""")
+'''
 
 
 def _index_path() -> Path:
