@@ -85,6 +85,36 @@ REMNANT.md
 
 That is enough. The agent instruction file tells the agent to read and update `REMNANT.md`.
 
+## Easy Command Install
+
+If you want to type `remnant install claude` in Command Prompt, install the command once.
+
+Windows PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+Then close and reopen Command Prompt.
+
+Test:
+
+```cmd
+remnant --help
+```
+
+Now these work from any project:
+
+```cmd
+remnant install claude
+remnant install codex
+remnant install gemini
+remnant install antigravity
+remnant install all
+```
+
+If `remnant` is not recognized, the PATH update has not loaded yet. Open a new Command Prompt and try again.
+
 ## No Paste Setup For Claude Code
 
 Remnant can add persistent project instructions so you do not need to paste "read REMNANT.md" every time.
@@ -92,7 +122,7 @@ Remnant can add persistent project instructions so you do not need to paste "rea
 For Claude Code, Remnant writes `.claude` integration files and appends a Remnant block to root `CLAUDE.md`:
 
 ```bash
-uv run remnant install claude
+remnant install claude
 ```
 
 This creates:
@@ -108,13 +138,13 @@ Claude Code loads `.claude/CLAUDE.md` at startup. The `SessionStart` hook also i
 Use `--force` to overwrite existing Remnant-managed Claude files:
 
 ```bash
-uv run remnant install claude --force
+remnant install claude --force
 ```
 
 For Codex:
 
 ```bash
-uv run remnant install codex
+remnant install codex
 ```
 
 This appends a Remnant block to root `AGENTS.md`.
@@ -122,7 +152,7 @@ This appends a Remnant block to root `AGENTS.md`.
 For Google Antigravity:
 
 ```bash
-uv run remnant install antigravity
+remnant install antigravity
 ```
 
 This appends a Remnant block to root `AGENTS.md`.
@@ -130,7 +160,7 @@ This appends a Remnant block to root `AGENTS.md`.
 For Gemini CLI:
 
 ```bash
-uv run remnant install gemini
+remnant install gemini
 ```
 
 This appends a Remnant block to root `GEMINI.md`.
@@ -138,7 +168,7 @@ This appends a Remnant block to root `GEMINI.md`.
 Install every supported local integration:
 
 ```bash
-uv run remnant install all
+remnant install all
 ```
 
 ## Daily Use
