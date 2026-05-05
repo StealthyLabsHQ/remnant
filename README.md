@@ -95,17 +95,24 @@ Windows PowerShell:
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/StealthyLabsHQ/remnant/main/install.ps1 | iex"
 ```
 
+macOS Terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/StealthyLabsHQ/remnant/main/install.sh | sh
+```
+
 This downloads Remnant from GitHub into:
 
 ```text
 %USERPROFILE%\.remnant\remnant
+~/.remnant/remnant
 ```
 
-Then close and reopen Command Prompt.
+Then close and reopen Command Prompt or Terminal.
 
 Test:
 
-```cmd
+```bash
 remnant --help
 ```
 
@@ -148,6 +155,9 @@ If you run install from your home folder, Remnant installs global agent instruct
 %USERPROFILE%\.claude\CLAUDE.md
 %USERPROFILE%\.codex\AGENTS.md
 %USERPROFILE%\.gemini\GEMINI.md
+~/.claude/CLAUDE.md
+~/.codex/AGENTS.md
+~/.gemini/GEMINI.md
 ```
 
 Existing `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` content is preserved. Remnant only appends a `## Remnant Integration` section.
@@ -162,7 +172,7 @@ GEMINI.md
 
 Project-local instruction files are append-only too. Remnant does not delete or rewrite your existing rules.
 
-If `remnant` is not recognized, the PATH update has not loaded yet. Open a new Command Prompt and try again.
+If `remnant` is not recognized, the PATH update has not loaded yet. Open a new Command Prompt or Terminal and try again.
 
 ## No Paste Setup For Claude Code
 
