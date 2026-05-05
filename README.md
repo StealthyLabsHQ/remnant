@@ -41,13 +41,13 @@ Remnant remembers by writing `REMNANT.md` in the repository root. That makes the
 
 ## Compatible Agents
 
-Remnant works with any agent that can read a file and accept pasted context.
+Remnant works by giving each agent the instruction file it actually reads, plus the shared `REMNANT.md` memory file.
 
 ```text
-Claude Code          read AGENTS.md + REMNANT.md before work
-Codex                read AGENTS.md + REMNANT.md before work
-Gemini CLI           run remnant inject, paste output into the prompt
-Google Antigravity   attach or paste REMNANT.md as project context
+Claude Code          reads CLAUDE.md + REMNANT.md
+Gemini CLI           reads GEMINI.md + REMNANT.md
+Codex (OpenAI)       reads AGENTS.md + REMNANT.md
+Google Antigravity   reads AGENTS.md + REMNANT.md
 ```
 
 ## CLI Usage
