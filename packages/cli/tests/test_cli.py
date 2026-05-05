@@ -32,11 +32,12 @@ def test_init_creates_valid_markdown(tmp_path: Path, monkeypatch: MonkeyPatch) -
 
 
 def test_no_command_opens_interactive_shell_and_exits() -> None:
-    result = runner.invoke(app, input="/help\n/exit\n", catch_exceptions=False)
+    result = runner.invoke(app, input="/\n/exit\n", catch_exceptions=False)
 
     assert result.exit_code == 0
-    assert "Remnant CLI" in result.stdout
-    assert "/install <claude|codex|gemini|antigravity|all>" in result.stdout
+    assert "REMNANT." in result.stdout
+    assert "Type / to list commands" in result.stdout
+    assert "/install <agent>" in result.stdout
 
 
 def test_interactive_install_codex(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:

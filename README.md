@@ -115,9 +115,10 @@ Start the interactive Remnant CLI:
 remnant
 ```
 
-Then type:
+Then type `/` to show commands:
 
 ```text
+/
 /install claude
 /install codex
 /install gemini

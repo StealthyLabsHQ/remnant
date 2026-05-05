@@ -20,6 +20,25 @@ from remnant_cli.schema import (
 
 app = typer.Typer(help="Persist AI session context across coding sessions.", invoke_without_command=True)
 DEFAULT_FILE = "REMNANT.md"
+SHELL_COMMANDS = [
+    ("/install <agent>", "install claude, codex, gemini, antigravity, or all"),
+    ("/init", "create REMNANT.md in the current project"),
+    ("/capture <next>", "save the next step and current git state"),
+    ("/inject", "print compact context for an agent prompt"),
+    ("/sync", "validate local memory; backend sync is not implemented"),
+    ("/status", "show this project memory status"),
+    ("/status --all", "list indexed project memories"),
+    ("/search <query>", "search indexed project memories"),
+    ("/exit", "leave the Remnant shell"),
+]
+SHELL_LOGO = r"""
+REMNANT.
+######  ####### #     # #     #  ###  #     # #######
+#     # #       ##   ## ##    # #   # ##    #    #
+######  #####   # # # # # #   # ##### # #   #    #
+#   #   #       #  #  # #  #  # #   # #  #  #    #
+#    #  ####### #     # #   ### #   # #   ###    #
+"""
 
 
 @app.callback(invoke_without_command=True)
@@ -432,10 +451,10 @@ def _fail(message: str) -> None:
 
 
 def _run_shell() -> None:
-    typer.echo("Remnant CLI. Type /help for commands, /exit to quit.")
+    typer.echo(_shell_banner())
     while True:
         try:
-            raw = input("remnant> ").strip()
+            raw = input("remnant > ").strip()
         except (EOFError, KeyboardInterrupt):
             typer.echo("")
             return
@@ -446,12 +465,12 @@ def _run_shell() -> None:
         if raw in ("/exit", "exit", "quit", "/quit"):
             return
 
-        if raw == "/help":
+        if raw in ("/", "/help"):
             typer.echo(_shell_help())
             continue
 
         if not raw.startswith("/"):
-            typer.echo("Use slash commands, for example /install claude or /init.")
+            typer.echo("Use slash commands. Type / to list commands.")
             continue
 
         _run_shell_command(raw)
@@ -499,17 +518,22 @@ def _run_shell_command(raw: str) -> None:
 
 
 def _shell_help() -> str:
-    return """Commands:
-/install <claude|codex|gemini|antigravity|all>
-/init
-/capture <next step>
-/inject
-/sync
-/status
-/status --all
-/search <query>
-/exit
-"""
+    width = max(len(command) for command, _ in SHELL_COMMANDS)
+    lines = ["Commands", "--------"]
+    lines.extend(f"{command.ljust(width)}  {description}" for command, description in SHELL_COMMANDS)
+    return "\n".join(lines) + "\n"
+
+
+def _shell_banner() -> str:
+    return "\n".join(
+        [
+            SHELL_LOGO.strip(),
+            "",
+            "LOCAL MEMORY FOR AI CODING SESSIONS",
+            "Type / to list commands. Type /exit to quit.",
+            "",
+        ]
+    )
 
 
 if __name__ == "__main__":
