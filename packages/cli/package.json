@@ -1,0 +1,22 @@
+{
+  "name": "@remnant/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "remnant": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "bun build src/index.ts --target bun --outfile dist/remnant.js",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.14",
+    "typescript": "^5.6.3"
+  }
+}

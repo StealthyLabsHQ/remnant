@@ -1,0 +1,109 @@
+# Remnant
+
+```text
+██████╗ ███████╗███╗   ███╗███╗   ██╗ █████╗ ███╗   ██╗████████╗
+██╔══██╗██╔════╝████╗ ████║████╗  ██║██╔══██╗████╗  ██║╚══██╔══╝
+██████╔╝█████╗  ██╔████╔██║██╔██╗ ██║███████║██╔██╗ ██║   ██║
+██╔══██╗██╔══╝  ██║╚██╔╝██║██║╚██╗██║██╔══██║██║╚██╗██║   ██║
+██║  ██║███████╗██║ ╚═╝ ██║██║ ╚████║██║  ██║██║ ╚████║   ██║
+╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝
+
+LOCAL MEMORY FOR AI CODING SESSIONS
+```
+
+Remnant is a local memory file for AI coding agents. It writes the current project state to `REMNANT.md` so a new Claude Code, Codex, Gemini CLI, or Google Antigravity session can resume without asking you to explain the project again.
+
+## How It Works
+
+Remnant stores context in plain Markdown, committed beside your code:
+
+```text
+REMNANT.md
+├─ Session   date, agent, duration
+├─ Done      what was completed
+├─ Failed    what did not work and why
+├─ State     current codebase state
+├─ Next      exact next step
+└─ Blockers  unresolved questions or dependencies
+```
+
+The file is human-readable first and machine-parseable second. Nothing is sent anywhere unless a future backend sync is explicitly used.
+
+## Local Storage
+
+Remnant remembers by writing `REMNANT.md` in the repository root. That makes the memory:
+
+- local to your machine and project
+- visible to any CLI agent that can read files
+- portable through git commits
+- editable by humans
+- independent from any single LLM vendor
+
+## Compatible Agents
+
+Remnant works with any agent that can read a file and accept pasted context.
+
+```text
+Claude Code          read AGENTS.md + REMNANT.md before work
+Codex                read AGENTS.md + REMNANT.md before work
+Gemini CLI           run remnant inject, paste output into the prompt
+Google Antigravity   attach or paste REMNANT.md as project context
+```
+
+## CLI Usage
+
+Install dependencies:
+
+```bash
+cd packages/cli
+bun install
+```
+
+Initialize memory at the repository root:
+
+```bash
+bun run src/index.ts init --file ../../REMNANT.md
+```
+
+Save context before switching agents:
+
+```bash
+bun run src/index.ts capture --file ../../REMNANT.md --next "Describe the exact next step"
+```
+
+Inject context into a new LLM session:
+
+```bash
+bun run src/index.ts inject --file ../../REMNANT.md
+```
+
+Check the current memory:
+
+```bash
+bun run src/index.ts status --file ../../REMNANT.md
+```
+
+Validate future sync readiness:
+
+```bash
+bun run src/index.ts sync --file ../../REMNANT.md
+```
+
+`sync` currently validates `REMNANT.md` and prints a placeholder. Backend sync is intentionally not implemented yet.
+
+## Current Package
+
+```text
+packages/cli
+├─ src/index.ts       Commander.js CLI
+├─ src/schema.ts      Zod schema + REMNANT.md parser/renderer
+└─ src/index.test.ts  Bun tests
+```
+
+## Test
+
+```bash
+cd packages/cli
+bun install
+bun run test
+```
