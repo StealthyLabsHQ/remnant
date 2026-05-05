@@ -202,13 +202,19 @@ def test_install_all_appends_without_duplicate_blocks(tmp_path: Path, monkeypatc
 def test_install_all_from_home_uses_global_agent_dirs(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setenv("USERPROFILE", str(tmp_path))
     monkeypatch.setenv("HOME", str(tmp_path))
+    (tmp_path / ".codex").mkdir()
+    (tmp_path / ".claude").mkdir()
+    (tmp_path / ".gemini").mkdir()
+    (tmp_path / ".codex" / "AGENTS.md").write_text("# Existing Global Codex\n\nKeep this.\n", encoding="utf-8")
+    (tmp_path / ".claude" / "CLAUDE.md").write_text("# Existing Global Claude\n\nKeep this.\n", encoding="utf-8")
+    (tmp_path / ".gemini" / "GEMINI.md").write_text("# Existing Global Gemini\n\nKeep this.\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["install", "all"], catch_exceptions=False)
 
     assert result.exit_code == 0
-    assert (tmp_path / ".claude" / "CLAUDE.md").exists()
-    assert (tmp_path / ".codex" / "AGENTS.md").exists()
-    assert (tmp_path / ".gemini" / "GEMINI.md").exists()
+    assert "Keep this." in (tmp_path / ".claude" / "CLAUDE.md").read_text(encoding="utf-8")
+    assert "Keep this." in (tmp_path / ".codex" / "AGENTS.md").read_text(encoding="utf-8")
+    assert "Keep this." in (tmp_path / ".gemini" / "GEMINI.md").read_text(encoding="utf-8")
     assert not (tmp_path / "AGENTS.md").exists()
     assert not (tmp_path / "GEMINI.md").exists()
 

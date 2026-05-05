@@ -127,6 +127,8 @@ If you run install from your home folder, Remnant installs global agent instruct
 %USERPROFILE%\.gemini\GEMINI.md
 ```
 
+Existing `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` content is preserved. Remnant only appends a `## Remnant Integration` section.
+
 If you run install inside a project folder, Remnant adds project-local instructions:
 
 ```text
@@ -134,6 +136,8 @@ If you run install inside a project folder, Remnant adds project-local instructi
 AGENTS.md
 GEMINI.md
 ```
+
+Project-local instruction files are append-only too. Remnant does not delete or rewrite your existing rules.
 
 If `remnant` is not recognized, the PATH update has not loaded yet. Open a new Command Prompt and try again.
 
@@ -162,6 +166,8 @@ Use `--force` to overwrite existing Remnant-managed Claude files:
 ```bash
 remnant install claude --force
 ```
+
+`--force` only overwrites Remnant-managed `.claude/settings.json` and `.claude/hooks/remnant_session_start.py`. It still appends to instruction Markdown files instead of replacing them.
 
 For Codex:
 
